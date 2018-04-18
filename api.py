@@ -1,3 +1,4 @@
+import pandas as pd
 import requests
 import json
 from optparse import OptionParser
@@ -6,10 +7,10 @@ import sys
 
 
 
-class Myoanda:
-  def __init__(self):
-    self.access_token = '70b5158af805e0f3f427d9c2c8864cf0-a9bda9dcfa16842c09e39db487950ed7'
-    self.account_id = '3205831'
+class oanda:
+  def __init__(self, access_token, account_id):
+    self.access_token = access_token
+    self.account_id = account_id
     self.domainDict = { 'stream_live' : 'stream-fxtrade.oanda.com',
                         'stream_demo' : 'stream-fxpractice.oanda.com',
                         'live' : 'api-fxpractice.oanda.com',
@@ -51,7 +52,7 @@ class Myoanda:
 
 
   def get_prices(self,**params):
-    
+
     self.domain = self.domainDict['stream_demo']
     params['account_Id'] = self.account_id
     if 'instruments' not in params: params['instruments'] = self.instruments
@@ -70,7 +71,7 @@ class Myoanda:
       print("Caught exception when connecting to stream\n" + str(e))
       sys.exit()
 
-  
+
   def get_candles(self,**params):
 
     self.domain = self.domainDict['demo']
@@ -85,6 +86,18 @@ class Myoanda:
       r = requests.get(url, headers=self.headers, params=params)
       print(params)
       print(r.text)
+      return r
     except Exception as e:
       print("Caught exception when connecting to stream\n" + str(e))
-      sys.exit()
+      return None
+
+
+  def get_BollingerBand(self, **params):
+
+    candles = self.get_candles(params)
+    base = pd.Series.rolling(candles, window=25).mean()
+    sigma = pd.Series.rolling(candles, window=25).std(ddof=0)
+    upper_sigma = base + sigma
+    upper2_sigma = base + sigma * 2
+    low_sigma = base - sigma
+    low2_sigma = base = sigma * 2

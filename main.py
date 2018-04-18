@@ -1,10 +1,13 @@
-import Fx
+import api
+import yaml
+
+
 
 '''
-class Myoanda
+class oanda
 def get_prices():
     instruments(deault:"USD_JPY")
-    
+
 def get_candles():
     instrument(deault:"USD_JPY")
     granularity(default:"S5"): Optional The time range represented by each candlestick. The value specified will determine the alignment of the first candlestick
@@ -23,9 +26,19 @@ def get_candles():
                     The value specified is interpretted as an hour   in the timezone set through the alignmentTimezone parameter and must be an integer between 0 and 23.
     alignmentTimezone(default:Asia/Tokyo):
 
+
+def get_bollingerBand(get_pandles_params)
 '''
 
-oanda = Fx.Myoanda()
 
-#oanda.get_prices()
-oanda.get_candles()
+if __name__ == "__main__":
+    f = open('../fx_config.yml', 'r+')
+    y = yaml.load(f)
+
+    oanda = api.oanda(
+        y["access_token"],
+        y["account_id"]
+    )
+
+    #oanda.get_prices()
+    #oanda.get_candles()
