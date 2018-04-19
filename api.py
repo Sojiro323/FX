@@ -1,8 +1,7 @@
 # -*- coding:utf-8 -*-
-import pandas as pd
+from optparse import OptionParser
 import requests
 import json
-from optparse import OptionParser
 import sys
 
 
