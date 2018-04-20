@@ -7,7 +7,7 @@ import sys
 
 class oanda:
 
-  def __init__(self, accessToken, accountId, domain_type, instrument):
+  def __init__(self, accessToken, accountId, domain_type, instrument, units, granularity, UpperBound_tickets):
     self.accessToken = accessToken
     self.accountId = accountId
     self.domainDict = { 'stream_live' : 'stream-fxtrade.oanda.com', #production
@@ -19,6 +19,9 @@ class oanda:
     self.domain_stream = self.domainDict["stream_" + self.domain_type]
     self.instrument = instrument
     self.headers = {'Authorization' : 'Bearer ' + self.accessToken}
+    self.units = units
+    self.UpperBound_tickets = UpperBound_tickets
+    self.granularity = granularity
 
 
   def stream(self, response):
@@ -43,7 +46,7 @@ class oanda:
       if type == 'GET': r = requests.get(url, headers=headers, params=params)
       elif type == 'POST': r = requests.post(url, headers=headers, data=params)
       elif type == 'DELETE': r = requests.delete(url, headers=headers)
-      elif type == 'PATCH': r = requests.patch(url, params headers=headers)
+      elif type == 'PATCH': r = requests.patch(url, params, headers=headers)
       return r
     except Exception as e:
       print("Error : " + str(e))
@@ -73,15 +76,15 @@ class oanda:
 #過去のローソクを取得
   def get_candles(self,**params):
 
-    params['accountId'] = self.accountId
     params['instrument'] = self.instrument
     if 'alignmentTimeZone' not in params: params['alignmentTimeZone'] = "Asia/Tokyo"
     url = "/v1/candles"
+    headers = self.headers
 
-    return self.connect("GET", url, params, self.headers)
+    return self.connect("GET", url, params, headers)
 
 
-"""----------------------ticket----------------------"""
+#----------------------ticket----------------------
 #未決済チケットの取得
   def get_tickets(self, **params):
 
@@ -90,7 +93,7 @@ class oanda:
     return self.connect("GET", url, params, self.headers)
 
 #チケットの変更
-  def get_tickets(self, trade_id, **params):
+  def alter_tickets(self, trade_id, **params):
 
     url = "/v1/accounts/" + self.accountId + "/trades" + trade_id
     return self.connect("PATCH", url, params, self.headers)
@@ -104,7 +107,7 @@ class oanda:
 
 
 
-"""----------------------position----------------------"""
+#----------------------position----------------------
 #未決済ポジションの取得
   def get_positions(self):
 
@@ -119,28 +122,28 @@ class oanda:
 
 
 
-"""----------------------order----------------------"""
+#----------------------order----------------------
 #注文
   def order(self,**params):
 
     params['accountId'] = self.accountId
     params['instrument'] = self.instrument
+    params['units'] = self.units
     url = "/v1/accounts/" + self.accountId + "/orders"
-    headers = self.headers
-    headers['X-Accept-Datetime-Format'] = 'unix'
+    print(params)
 
-
-    return self.connect("POST", url, params, headers)
+    return self.connect("POST", url, params, self.headers)
 
 #未決済注文の取得
   def get_orders(self, **params):
 
     params["instrument"] = self.instrument
+    params["units"] = self.units
     url = "/v1/accounts/" + self.accountId + "/orders"
     return self.connect("GET", url, params, self.headers)
 
 #注文の変更
-  def get_orders(self, order_id, **params):
+  def alter_orders(self, order_id, **params):
 
     url = "/v1/accounts/" + self.accountId + "/orders/" + order_id
     return self.connect("PATCH", url, params, self.headers)
