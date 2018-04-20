@@ -4,7 +4,6 @@ import json
 
 
 def processing(api):
-    print("start")
     flag, takeProfit, stopLoss = ct.get_BollingerBand(api)
     if flag: flag = utils.order_condition(flag, api)
     if flag == 'buy':
